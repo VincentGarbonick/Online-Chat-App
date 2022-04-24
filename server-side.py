@@ -5,7 +5,7 @@ from _thread import *
 
 def clientthread(conn, addr):
     # TODO: send all messages stored in message history to this
-    conn.send("Welcome to this Chatroom")
+    conn.send("Welcome to this Chatroom".encode())
 
     while True: 
         try: 
@@ -23,7 +23,7 @@ def clientthread(conn, addr):
                 # messed up connection 
                 remove(conn)
         except: 
-            contine
+            continue
 
 def broadcast(message, connection): 
     for clients in list_of_clients:
