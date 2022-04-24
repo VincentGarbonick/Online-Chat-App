@@ -33,7 +33,7 @@ while True:
             print (message.decode())
         else:
             message = sys.stdin.readline()
-            server.send(message.encode)
+            server.send(message.encode())
             sys.stdout.write("<You>")
             sys.stdout.write(message)
             sys.stdout.flush()

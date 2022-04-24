@@ -14,10 +14,10 @@ def clientthread(conn, addr):
             if message: 
                 # prints message and addr of user who sent the message 
                 # on server terminal 
-                print("<" + addr[0] + ">" + message)
+                print(f"<{addr[0]}> {message.decode()}")
 
                 # calls broadcast function to send message to all 
-                message_to_send = print(f"<{addr[0]}> {message}")
+                message_to_send = f"<{addr[0]}> {message.decode()}"
                 broadcast(message_to_send, conn)
             else:
                 # messed up connection 
@@ -29,7 +29,7 @@ def broadcast(message, connection):
     for clients in list_of_clients:
         if clients != connection:
             try: 
-                clients.send(message)
+                clients.send(message.encode())
             except: 
                 clients.close()
                 remove(clients)
