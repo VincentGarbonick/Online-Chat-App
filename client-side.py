@@ -3,7 +3,9 @@
 import socket
 import select
 import sys
- 
+import rsa
+
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 if len(sys.argv) != 3:
     print ("Correct usage: script, IP address, port number")
@@ -11,7 +13,28 @@ if len(sys.argv) != 3:
 IP_address = str(sys.argv[1])
 Port = int(sys.argv[2])
 server.connect((IP_address, Port))
- 
+
+
+# open our private and public keys 
+try:
+    public_file = open("public.txt", "r")
+    private_file = open("private.txt", "r")
+
+    public_raw = public_file.read()
+    private_raw = private_file.read()
+
+    # we now have our keys 
+    public_key = rsa.PublicKey.load_pkcs1(public_raw.encode('utf8'))
+    private_key = rsa.PrivateKey.load_pkcs1(private_raw.encode('utf8'))
+
+    public_file.close()
+    private_file.close()
+
+except:
+
+    print("Keys not found. Look at README and consider generating some!")
+    exit()
+
 while True:
  
     # maintains a list of possible input streams
@@ -30,11 +53,23 @@ while True:
     for socks in read_sockets:
         if socks == server:
             message = socks.recv(2048)
-            print (message.decode())
+            
+            try:
+                message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
+                print(message_decrypted)
+            # for some reason, when the program first runs, the server sends some kind of unencrypted string,
+            # so the program whines and fails to decrypt the first time
+            except:
+                continue 
+            
+            
         else:
-            message = sys.stdin.readline()
-            server.send(message.encode())
-            sys.stdout.write("<You>")
-            sys.stdout.write(message)
-            sys.stdout.flush()
+            #TODO: format this [redacted] to look like <username/ID> _____ and have your 
+            # message there so it looks like a chatroom
+            message = rsa.encrypt(sys.stdin.readline().encode(), public_key)
+            #message = sys.stdin.readline()
+            server.send(message)
+            #sys.stdout.write("<You>")
+            #sys.stdout.write(message)
+            #sys.stdout.flush()
 server.close()
