@@ -3,10 +3,14 @@ import select
 import sys 
 import rsa
 from _thread import * 
+import threading
 
 # https://stackoverflow.com/questions/65597453/how-to-store-private-and-public-key-into-pem-file-generated-by-rsa-module-of-pyt
 
-def clientthread(conn, addr):
+
+#def heartbeat_listener()
+
+def create_client(conn, addr):
     try:
         public_file = open("public.txt", "r")
         private_file = open("private.txt", "r")
@@ -26,10 +30,7 @@ def clientthread(conn, addr):
         print("Keys not found. Look at README and consider generating some!")
         exit()
 
-    # TODO: send all messages stored in message history to this
-    conn.send("Welcome to this Chatroom".encode())
-
-    while True: 
+    while threading.main_thread().isAlive(): 
         try: 
             message = conn.recv(2048)
 
@@ -39,16 +40,26 @@ def clientthread(conn, addr):
                 message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
                 print(f"<{addr[0]}> {message_decrypted}")
                 
-                # calls broadcast function to send message to all 
+                # calls message_all_clients function to send message to all 
                 message_to_send = f"<{addr[0]}> {message_decrypted}"
-                broadcast(message_to_send, conn, public_key)
+                message_all_clients(message_to_send, conn, public_key)
             else:
                 # messed up connection 
                 remove(conn)
         except: 
             continue
-#TODO: make sure broadcast is working with encoding/decoding 
-def broadcast(message, connection, public_key): 
+        '''
+        # constantly try pinging client with info to see if it's "alive" or not 
+        try:
+            keepalive_message_encrypted = rsa.encrypt("wliqqquekhrlkjnsmnaqqq".encode(), public_key)
+            conn.send(keepalive_message_encrypted)
+        except: 
+            print("whoopsie woo!@@@@@")
+        '''
+    print("exiting")
+
+#TODO: debug this on your other computer, for some reason the RSA module isn't installing correctly :/
+def message_all_clients(message, connection, public_key): 
     for clients in list_of_clients:
         if clients != connection:
             try: 
@@ -67,32 +78,32 @@ if __name__ == "__main__":
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
 
     if len(sys.argv) != 3:
-        print("Provide Script, IP address, port number")
+        print("[WARNING] Incorrect usage of program.")
+        print("Correct usage: ")
+        print("python3 server-side.py HOST_IP HOST_PORT")
+        exit()
 
     else:
-        IP_address = str(sys.argv[1])
-
+        
+        list_of_clients = []
+        host_IP = str(sys.argv[1])
         port = int(sys.argv[2])
-
-        server.bind((IP_address, port))
-
+        server.bind((host_IP, port))
         server.listen(100)
 
-        list_of_clients = []
+    try:    
+        while True:
+            conn, addr = server.accept()
+    
+            list_of_clients.append(conn)
+    
+            # connect message
+            print (addr[0] + " connected")
+    
+            # create client for each connected user
+            start_new_thread(create_client,(conn,addr))    
 
-    while True:
-
-        conn, addr = server.accept()
- 
-
-        list_of_clients.append(conn)
- 
-        # prints the address of the user that just connected
-        print (addr[0] + " connected")
- 
-        # creates and individual thread for every user
-        # that connects
-        start_new_thread(clientthread,(conn,addr))    
- 
-    conn.close()
-    server.close()
+    except(KeyboardInterrupt, SystemExit):
+        print("bye")
+        #conn.close()
+        server.close()

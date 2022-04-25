@@ -1,18 +1,17 @@
-
-# Python program to implement client side of chat room.
 import socket
 import select
 import sys
 import rsa
 
-
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 if len(sys.argv) != 3:
-    print ("Correct usage: script, IP address, port number")
+    print("[WARNING] Incorrect usage of program.")
+    print("Correct usage: ")
+    print("python3 server-side.py HOST_IP HOST_PORT")
     exit()
-IP_address = str(sys.argv[1])
-Port = int(sys.argv[2])
-server.connect((IP_address, Port))
+host_IP = str(sys.argv[1])
+port = int(sys.argv[2])
+server.connect((host_IP, port))
 
 
 # open our private and public keys 
@@ -66,10 +65,7 @@ while True:
         else:
             #TODO: format this [redacted] to look like <username/ID> _____ and have your 
             # message there so it looks like a chatroom
-            message = rsa.encrypt(sys.stdin.readline().encode(), public_key)
-            #message = sys.stdin.readline()
-            server.send(message)
-            #sys.stdout.write("<You>")
-            #sys.stdout.write(message)
-            #sys.stdout.flush()
+            message_encrypted = rsa.encrypt(sys.stdin.readline().encode(), public_key)
+            server.send(message_encrypted)
+
 server.close()
