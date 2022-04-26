@@ -13,11 +13,21 @@ list_of_clients = []
 list_of_addresses = []
 
 def heartbeat_listener():    
+    # instantiate a dummy socket object to test heartbeats with
+    s = socket.socket()
     while threading.main_thread().isAlive(): 
+        
+        for addr in list_of_addresses:
+            try:
+                #print("Connecting to : " + str(addr))
+                #test = socket.create_connection(('173.89.275.99', 33116),1)
+                test = socket.create_connection(addr,1)
 
-        for client in list_of_clients:
-            print(client.fileno())
-            
+            except Exception as e:
+                #print(e)
+                continue
+
+        
         time.sleep(1)
 
 
@@ -40,7 +50,8 @@ def create_client(conn, addr, public_key, private_key):
                 message_all_clients(message_to_send, conn, public_key)
 
         except: 
-            continue
+            if conn in list_of_clients:
+                list_of_clients.remove(conn)
 
 
 #TODO: debug this on your other computer, for some reason the RSA module isn't installing correctly :/
@@ -51,12 +62,8 @@ def message_all_clients(message, connection, public_key):
                 client.send(rsa.encrypt(message.encode(), public_key))
             except: 
                 client.close()
-                remove(client)
-
-def remove(connection):
-    if connection in list_of_clients:
-        list_of_clients.remove(connection)
-        
+                if connection in list_of_clients:
+                    list_of_clients.remove(connection)
                   
 if __name__ == "__main__":
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -102,15 +109,14 @@ if __name__ == "__main__":
             # conn is a socket object that can send and recieve data 
             # addr is the address bound to the socket on the other end of the connection 
             conn, addr = server.accept()
-    
             list_of_clients.append(conn)
             list_of_addresses.append(addr)
     
             # connect message
-            print (addr[0] + " connected")
+            print(f"<{addr[0]}> Connected")
     
             # create client for each connected user
-            start_new_thread(create_client,(conn, addr, public_key, private_key))    
+            start_new_thread(create_client,(conn, addr, public_key, private_key))   
 
     except(KeyboardInterrupt, SystemExit):
         print("\nServer Closed")

@@ -3,6 +3,10 @@ import select
 import sys
 import rsa
 
+# TODO: consider rewriting client to something like this for...reasons 
+# https://python.plainenglish.io/build-a-chatroom-app-with-python-458fc435025a
+
+# IPV4 and TCP 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 if len(sys.argv) != 3:
     print("[WARNING] Incorrect usage of program.")
@@ -39,16 +43,23 @@ try:
     
         # maintains a list of possible input streams
         sockets_list = [sys.stdin, server]
+        
+        # select.select is for monitoring sockets, open files, and pipes until they can be R/W 
+        # https://bip.weizmann.ac.il/course/python/PyMOTW/PyMOTW/docs/select/index.html
+        read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
     
-        read_sockets,write_socket, error_socket = select.select(sockets_list,[],[])
-    
+        # constantly checking between the server for broadcasted messages, 
+        # or sending a message of its own 
         for socks in read_sockets:
+
             if socks == server:
+
                 message = socks.recv(2048)
 
                 try:
                     message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
                     print(message_decrypted)
+
                 # for some reason, when the program first runs, the server sends some kind of unencrypted string,
                 # so the program whines and fails to decrypt the first time
                 except:
@@ -63,4 +74,6 @@ try:
 except(KeyboardInterrupt, SystemExit): 
     print("\nClient Exiting...")
     #close the socket
+    message_encrypted = rsa.encrypt("Disconnected".encode(), public_key)
+    server.send(message_encrypted)
     server.close()
