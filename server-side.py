@@ -8,17 +8,16 @@ import time
 
 # https://stackoverflow.com/questions/65597453/how-to-store-private-and-public-key-into-pem-file-generated-by-rsa-module-of-pyt
 
+# global variables for the list of clients and addresses
+list_of_clients = []
+list_of_addresses = []
 
-def heartbeat_listener(public_key):
-
-    keepalive_message_encrypted = rsa.encrypt("wliqqquekhrlkjnsmnaqqq".encode(), public_key)
-    
+def heartbeat_listener():    
     while threading.main_thread().isAlive(): 
 
         for client in list_of_clients:
-            #print(client.fileno())
-            continue
-        #print("poopie!!!")
+            print(client.fileno())
+            
         time.sleep(1)
 
 
@@ -39,9 +38,7 @@ def create_client(conn, addr, public_key, private_key):
                 # calls message_all_clients function to send message to all 
                 message_to_send = f"<{addr[0]}> {message_decrypted}"
                 message_all_clients(message_to_send, conn, public_key)
-            else:
-                remove(conn)
-                #continue
+
         except: 
             continue
 
@@ -73,7 +70,7 @@ if __name__ == "__main__":
 
     else:
         
-        list_of_clients = []
+
         host_IP = str(sys.argv[1])
         port = int(sys.argv[2])
         server.bind((host_IP, port))
@@ -98,7 +95,7 @@ if __name__ == "__main__":
             print("Keys not found. Look at README and consider generating some!")
             exit()
         
-        #start_new_thread(heartbeat_listener,(public_key,))
+        start_new_thread(heartbeat_listener,())
 
     try:    
         while True:
@@ -107,6 +104,7 @@ if __name__ == "__main__":
             conn, addr = server.accept()
     
             list_of_clients.append(conn)
+            list_of_addresses.append(addr)
     
             # connect message
             print (addr[0] + " connected")
