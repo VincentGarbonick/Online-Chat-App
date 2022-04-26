@@ -6,6 +6,7 @@ import rsa
 from _thread import *
 import threading
 import time 
+import logging 
 
 # https://stackoverflow.com/questions/65597453/how-to-store-private-and-public-key-into-pem-file-generated-by-rsa-module-of-pyt
 
@@ -38,7 +39,7 @@ def create_client(conn, addr, public_key, private_key):
     username = rsa.decrypt(conn.recv(2048), private_key).decode('utf8').strip() # remove newline at end 
     # addr is formatted like IP, port, and we only care about IP. Cut it out. Also cut out leading parenthesis.
     ip_address = (str(addr).split(",")[0])[1:]
-    
+
     while threading.main_thread().isAlive(): 
         try: 
             # blocks until it gets at least one byte or the socket is closed
@@ -109,6 +110,15 @@ if __name__ == "__main__":
             exit()
         
         start_new_thread(heartbeat_listener,())
+        
+        # set up logging 
+        log = logging.getLogger("mylog")
+        log.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s %(threadName)-11s %(levelname)-10s %(message)s")
+        filehandler = logging.FileHandler("server_log.txt", "a")
+        filehandler.setLevel(logging.INFO)
+        filehandler.setFormatter(formatter)
+        log.addHandler(filehandler)
 
     try:    
         while True:
