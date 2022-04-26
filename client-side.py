@@ -69,9 +69,22 @@ if __name__ == "__main__":
         
         start_new_thread(listener, (server, public_key, private_key))
 
+        # Get user name
+        print("\nEnter username: " , end='')
+        #print("Enter username: ")
+        username = sys.stdin.readline()
+        server.send(rsa.encrypt(username.encode(), public_key))
+
         while True: 
             #TODO: format this [redacted] to look like <username/ID> _____ and have your 
             # message there so it looks like a chatroom
+
+            # due to python being infuriating, you have to write print like this or else 
+            # it won't print in loop
+            # https://stackoverflow.com/questions/25368786/python-print-does-not-work-in-loop
+            sys.stdout.write(f"{username.strip()}: ")
+            sys.stdout.flush()
+
             message_encrypted = rsa.encrypt(sys.stdin.readline().encode(), public_key)
             server.send(message_encrypted)
 
