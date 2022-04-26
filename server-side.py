@@ -4,34 +4,30 @@ import sys
 import rsa
 from _thread import * 
 import threading
+import time 
 
 # https://stackoverflow.com/questions/65597453/how-to-store-private-and-public-key-into-pem-file-generated-by-rsa-module-of-pyt
 
 
-#def heartbeat_listener()
+def heartbeat_listener(public_key):
 
-def create_client(conn, addr):
-    try:
-        public_file = open("public.txt", "r")
-        private_file = open("private.txt", "r")
+    keepalive_message_encrypted = rsa.encrypt("wliqqquekhrlkjnsmnaqqq".encode(), public_key)
+    
+    while threading.main_thread().isAlive(): 
 
-        public_raw = public_file.read()
-        private_raw = private_file.read()
+        for client in list_of_clients:
+            #print(client.fileno())
+            continue
+        #print("poopie!!!")
+        time.sleep(1)
 
-        # we now have our keys 
-        public_key = rsa.PublicKey.load_pkcs1(public_raw.encode('utf8'))
-        private_key = rsa.PrivateKey.load_pkcs1(private_raw.encode('utf8'))
 
-        public_file.close()
-        private_file.close()
-
-    except:
-
-        print("Keys not found. Look at README and consider generating some!")
-        exit()
+def create_client(conn, addr, public_key, private_key):
 
     while threading.main_thread().isAlive(): 
         try: 
+            # blocks until it gets at least one byte or the socket is closed
+            # that's why your [explitive] code wasn't working when you put it after this line  
             message = conn.recv(2048)
 
             if message: 
@@ -44,29 +40,21 @@ def create_client(conn, addr):
                 message_to_send = f"<{addr[0]}> {message_decrypted}"
                 message_all_clients(message_to_send, conn, public_key)
             else:
-                # messed up connection 
                 remove(conn)
+                #continue
         except: 
             continue
-        '''
-        # constantly try pinging client with info to see if it's "alive" or not 
-        try:
-            keepalive_message_encrypted = rsa.encrypt("wliqqquekhrlkjnsmnaqqq".encode(), public_key)
-            conn.send(keepalive_message_encrypted)
-        except: 
-            print("whoopsie woo!@@@@@")
-        '''
-    print("exiting")
+
 
 #TODO: debug this on your other computer, for some reason the RSA module isn't installing correctly :/
 def message_all_clients(message, connection, public_key): 
-    for clients in list_of_clients:
-        if clients != connection:
+    for client in list_of_clients:
+        if client != connection:
             try: 
-                clients.send(rsa.encrypt(message.encode(), public_key))
+                client.send(rsa.encrypt(message.encode(), public_key))
             except: 
-                clients.close()
-                remove(clients)
+                client.close()
+                remove(client)
 
 def remove(connection):
     if connection in list_of_clients:
@@ -91,8 +79,31 @@ if __name__ == "__main__":
         server.bind((host_IP, port))
         server.listen(100)
 
+        try:
+            public_file = open("public.txt", "r")
+            private_file = open("private.txt", "r")
+
+            public_raw = public_file.read()
+            private_raw = private_file.read()
+
+            # we now have our keys 
+            public_key = rsa.PublicKey.load_pkcs1(public_raw.encode('utf8'))
+            private_key = rsa.PrivateKey.load_pkcs1(private_raw.encode('utf8'))
+
+            public_file.close()
+            private_file.close()
+
+        except:
+
+            print("Keys not found. Look at README and consider generating some!")
+            exit()
+        
+        #start_new_thread(heartbeat_listener,(public_key,))
+
     try:    
         while True:
+            # conn is a socket object that can send and recieve data 
+            # addr is the address bound to the socket on the other end of the connection 
             conn, addr = server.accept()
     
             list_of_clients.append(conn)
@@ -101,9 +112,9 @@ if __name__ == "__main__":
             print (addr[0] + " connected")
     
             # create client for each connected user
-            start_new_thread(create_client,(conn,addr))    
+            start_new_thread(create_client,(conn, addr, public_key, private_key))    
 
     except(KeyboardInterrupt, SystemExit):
-        print("bye")
+        print("\nServer Closed")
         #conn.close()
         server.close()

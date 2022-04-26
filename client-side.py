@@ -34,38 +34,33 @@ except:
     print("Keys not found. Look at README and consider generating some!")
     exit()
 
-while True:
- 
-    # maintains a list of possible input streams
-    sockets_list = [sys.stdin, server]
- 
-    """ There are two possible input situations. Either the
-    user wants to give manual input to send to other people,
-    or the server is sending a message to be printed on the
-    screen. Select returns from sockets_list, the stream that
-    is reader for input. So for example, if the server wants
-    to send a message, then the if condition will hold true
-    below.If the user wants to send a message, the else
-    condition will evaluate as true"""
-    read_sockets,write_socket, error_socket = select.select(sockets_list,[],[])
- 
-    for socks in read_sockets:
-        if socks == server:
-            message = socks.recv(2048)
-            
-            try:
-                message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
-                print(message_decrypted)
-            # for some reason, when the program first runs, the server sends some kind of unencrypted string,
-            # so the program whines and fails to decrypt the first time
-            except:
-                continue 
-            
-            
-        else:
-            #TODO: format this [redacted] to look like <username/ID> _____ and have your 
-            # message there so it looks like a chatroom
-            message_encrypted = rsa.encrypt(sys.stdin.readline().encode(), public_key)
-            server.send(message_encrypted)
+try: 
+    while True:
+    
+        # maintains a list of possible input streams
+        sockets_list = [sys.stdin, server]
+    
+        read_sockets,write_socket, error_socket = select.select(sockets_list,[],[])
+    
+        for socks in read_sockets:
+            if socks == server:
+                message = socks.recv(2048)
 
-server.close()
+                try:
+                    message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
+                    print(message_decrypted)
+                # for some reason, when the program first runs, the server sends some kind of unencrypted string,
+                # so the program whines and fails to decrypt the first time
+                except:
+                    continue 
+                
+            else:
+                #TODO: format this [redacted] to look like <username/ID> _____ and have your 
+                # message there so it looks like a chatroom
+                message_encrypted = rsa.encrypt(sys.stdin.readline().encode(), public_key)
+                server.send(message_encrypted)
+
+except(KeyboardInterrupt, SystemExit): 
+    print("\nClient Exiting...")
+    #close the socket
+    server.close()
