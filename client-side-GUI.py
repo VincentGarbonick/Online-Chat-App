@@ -120,14 +120,14 @@ if __name__ == "__main__":
         # Creating tkinter main window
         root = Tk()
         root.title("Kitty Chat")
-        #root.geometry("800x620")
-        root.geometry("1000x1000")
+        root.geometry("800x620")
+        #root.geometry("1000x1000")
 
         root.columnconfigure(0, weight=3)
         root.columnconfigure(1, weight=1)
 
         text_area = ScrolledText(root, wrap = WORD, font = ("Times New Roman", 15))
-        text_area.grid(row=0, column=0, columnspan=1, sticky=NW, padx=(10,0))
+        text_area.grid(row=0, column=0, columnspan=2, sticky=NW, padx=(10,0))
 
 
         input_box = Text(root, height=TEXT_BOX_HEIGHT)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         send_button = Button(root, text="Send", height=1, 
         width=10, command= lambda: send_message(text_area, public_key, server, input_box))
 
-        send_button.grid(row=1, column=0, sticky= E, padx=30)
+        send_button.grid(row=1, column=1, sticky= E, padx=30)
 
         #start_new_thread(insert_tester, (text_area,))
         root.resizable(False, False)
