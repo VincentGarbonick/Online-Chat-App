@@ -52,7 +52,10 @@ def listener(server, text_area, private_key):
                     message = socks.recv(2048)
                     try:
                         message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
+                        text_area.configure(state='normal')
+
                         text_area.insert(INSERT,f"{message_decrypted}\n")
+                        text_area.configure(state='disabled')
                     # for some reason, when the program first runs, the server sends some kind of unencrypted string,
                     # so the program whines and fails to decrypt the first time
                     except:
@@ -66,7 +69,7 @@ def send_message(text_area, public_key, server, input_box):
     # get all text from the input box 
     text_area.configure(state='normal')
     text = input_box.get("1.0", "end-1c")
-    text_area.insert(INSERT,f"Me:{text}\n")
+    text_area.insert(INSERT,f"Me: {text}\n")
     message_encrypted = rsa.encrypt(text.encode(), public_key)
     server.send(message_encrypted)
     
