@@ -119,13 +119,13 @@ if __name__ == "__main__":
         # Creating tkinter main window
         root = Tk()
         root.title("Kitty Chat")
-        #root.geometry("600x400")
+        root.geometry("800x620")
 
         root.columnconfigure(0, weight=3)
         root.columnconfigure(1, weight=1)
 
         text_area = ScrolledText(root, wrap = WORD, font = ("Times New Roman", 15))
-        text_area.grid(row=0, column=0, columnspan=1, sticky=N, padx=(10,0))
+        text_area.grid(row=0, column=0, columnspan=1, sticky=NW, padx=(10,0))
 
 
         input_box = Text(root, height=TEXT_BOX_HEIGHT)
