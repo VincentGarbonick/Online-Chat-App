@@ -80,9 +80,12 @@ def listener(server, text_area, private_key):
                     message = socks.recv(2048)
                     try:
                         message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
+                        print(message_decrypted)
                         text_area.configure(state='normal')
 
                         text_area.insert(INSERT,f"{message_decrypted}\n")
+                        text_area.yview(END)
+
                         text_area.configure(state='disabled')
                     # for some reason, when the program first runs, the server sends some kind of unencrypted string,
                     # so the program whines and fails to decrypt the first time
@@ -103,6 +106,7 @@ def send_message(text_area, public_key, server, input_box):
     server.send(message_encrypted)
     
     input_box.delete('1.0', END)
+    text_area.yview(END)
     text_area.configure(state='disabled')
 
 def close_protocol(server, root):
@@ -178,8 +182,9 @@ if __name__ == "__main__":
         #start_new_thread(insert_tester, (text_area,))
         root.resizable(False, False)
         text_area.insert(INSERT, "Welcome to Kitty Chat!\n")
-        text_area.insert(INSERT, "Enter your username and press \"send\" to begin!\n")
+        text_area.insert(INSERT, "Please navigate to the popup window and enter a username to begin!\n")
         text_area.configure(state='disabled')
+
         start_new_thread(listener, (server, text_area, private_key))
 
         # when we press enter, it's the same as clicking send 
