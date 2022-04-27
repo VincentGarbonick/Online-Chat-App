@@ -12,6 +12,30 @@ WIN_WIDTH = 40
 WIN_HEIGHT = 10
 TEXT_BOX_HEIGHT = 1.5
 
+class MyDialog:
+    def __init__(self, parent):
+        top = self.top = Toplevel(parent)
+        self.myLabel = Label(top, text='Enter your username below')
+        self.myLabel.pack()
+
+        self.myEntryBox = Entry(top)
+        self.myEntryBox.pack()
+
+        self.mySubmitButton = Button(top, text='Submit', command=self.send)
+        self.mySubmitButton.pack()
+
+    def send(self):
+        global username
+        username = self.myEntryBox.get()
+        self.top.destroy()
+
+def spawnDialog(root, public_key):
+    inputDialog = MyDialog(root)
+    root.wait_window(inputDialog.top)
+    #print('Username: ', username)
+    message_encrypted = rsa.encrypt(username.encode(), public_key)
+    server.send(message_encrypted)
+
 def return_kitty():
     return(r"""
                                      ,
@@ -70,7 +94,7 @@ def send_message(text_area, public_key, server, input_box):
     text_area.configure(state='normal')
     text = input_box.get("1.0", "end-1c")
     text = str(text).strip()
-    text_area.insert(INSERT,f"Me: {text}\n")
+    text_area.insert(INSERT,f"{username}: {text}\n")
     message_encrypted = rsa.encrypt(text.encode(), public_key)
     server.send(message_encrypted)
     
@@ -159,6 +183,13 @@ if __name__ == "__main__":
 
         # if we press "exit," it is the same as cancelling this program from terminal
         root.protocol("WM_DELETE_WINDOW", lambda: close_protocol(server, root))
+        
+        #disable our input box and button until the user puts a username in 
+        input_box.configure(state='disabled')
+        send_button.configure(state='disabled')
+        spawnDialog(root, public_key)
+        input_box.configure(state='normal')
+        send_button.configure(state='normal')
 
         root.mainloop()
         # Get user name
