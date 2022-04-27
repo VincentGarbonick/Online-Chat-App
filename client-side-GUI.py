@@ -69,6 +69,7 @@ def send_message(text_area, public_key, server, input_box):
     # get all text from the input box 
     text_area.configure(state='normal')
     text = input_box.get("1.0", "end-1c")
+    text = str(text).strip()
     text_area.insert(INSERT,f"Me: {text}\n")
     message_encrypted = rsa.encrypt(text.encode(), public_key)
     server.send(message_encrypted)
@@ -119,7 +120,8 @@ if __name__ == "__main__":
         # Creating tkinter main window
         root = Tk()
         root.title("Kitty Chat")
-        root.geometry("800x620")
+        #root.geometry("800x620")
+        root.geometry("1000x1000")
 
         root.columnconfigure(0, weight=3)
         root.columnconfigure(1, weight=1)
