@@ -40,6 +40,7 @@ def create_client(conn, addr, public_key, private_key, log):
 
     print(f"{username} connecting from {ip_address}")
     log.info(f"{username} connecting from {ip_address}")
+    message_all_clients(f"{username} connected", conn, public_key)
 
     while threading.main_thread().isAlive(): 
         try: 

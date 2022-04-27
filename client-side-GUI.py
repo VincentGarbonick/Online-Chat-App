@@ -143,6 +143,7 @@ if __name__ == "__main__":
         text_area.configure(state='disabled')
         start_new_thread(listener, (server, text_area, private_key))
 
+        root.bind('<Return>', lambda event=None: send_button.invoke())
         root.mainloop()
         # Get user name
         
