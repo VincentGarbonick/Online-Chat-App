@@ -24,7 +24,7 @@ class MyDialog:
 
         self.mySubmitButton = Button(top, text='Submit', command=self.send)
         self.mySubmitButton.pack()
-
+        self.myEntryBox.focus_set()
         top.bind('<Return>', lambda event=None: self.mySubmitButton.invoke())
 
 
@@ -41,6 +41,7 @@ def spawnDialog(root, public_key, input_box, send_button):
     server.send(message_encrypted)
     input_box.configure(state='normal')
     send_button.configure(state='normal')
+    input_box.focus_set()
 
 def return_kitty():
     return(r"""
