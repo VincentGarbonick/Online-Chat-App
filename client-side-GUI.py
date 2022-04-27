@@ -77,6 +77,15 @@ def send_message(text_area, public_key, server, input_box):
     input_box.delete('1.0', END)
     text_area.configure(state='disabled')
 
+def close_protocol(server, root):
+    print("\nClient Exiting...")
+    #close the socket
+    message_encrypted = rsa.encrypt("Disconnected".encode(), public_key)
+    server.send(message_encrypted)
+    server.close()
+    root.destroy()
+
+
 if __name__ == "__main__":
     try:
         # TODO: consider rewriting client to something like this for...reasons 
@@ -145,7 +154,12 @@ if __name__ == "__main__":
         text_area.configure(state='disabled')
         start_new_thread(listener, (server, text_area, private_key))
 
+        # when we press enter, it's the same as clicking send 
         root.bind('<Return>', lambda event=None: send_button.invoke())
+
+        # if we press "exit," it is the same as cancelling this program from terminal
+        root.protocol("WM_DELETE_WINDOW", lambda: close_protocol(server, root))
+
         root.mainloop()
         # Get user name
         
