@@ -25,6 +25,9 @@ class MyDialog:
         self.mySubmitButton = Button(top, text='Submit', command=self.send)
         self.mySubmitButton.pack()
 
+        top.bind('<Return>', lambda event=None: self.mySubmitButton.invoke())
+
+
     def send(self):
         global username
         username = self.myEntryBox.get()
@@ -180,7 +183,6 @@ if __name__ == "__main__":
         start_new_thread(listener, (server, text_area, private_key))
 
         # when we press enter, it's the same as clicking send 
-        root.bind('<Return>', lambda event=None: send_button.invoke())
 
         # if we press "exit," it is the same as cancelling this program from terminal
         root.protocol("WM_DELETE_WINDOW", lambda: close_protocol(server, root))
@@ -191,6 +193,8 @@ if __name__ == "__main__":
         spawnDialog(root, public_key)
         input_box.configure(state='normal')
         send_button.configure(state='normal')
+
+        root.bind('<Return>', lambda event=None: send_button.invoke())
 
         root.mainloop()
         # Get user name
