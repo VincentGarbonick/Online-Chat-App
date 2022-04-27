@@ -15,9 +15,10 @@ TEXT_BOX_HEIGHT = 1.5
 class MyDialog:
     def __init__(self, parent):
         top = self.top = Toplevel(parent)
+        top.geometry("300x100")
         self.myLabel = Label(top, text='Enter your username below')
         self.myLabel.pack()
-
+        
         self.myEntryBox = Entry(top)
         self.myEntryBox.pack()
 
