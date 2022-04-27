@@ -33,12 +33,14 @@ def heartbeat_listener():
         time.sleep(1)
 
 
-def create_client(conn, addr, public_key, private_key):
+def create_client(conn, addr, public_key, private_key, log):
 
     # wait on username authorization 
     username = rsa.decrypt(conn.recv(2048), private_key).decode('utf8').strip() # remove newline at end 
     # addr is formatted like IP, port, and we only care about IP. Cut it out. Also cut out leading parenthesis.
     ip_address = (str(addr).split(",")[0])[1:]
+
+    log.info(f"{username} connecting from {ip_address}")
 
     while threading.main_thread().isAlive(): 
         try: 
@@ -52,7 +54,8 @@ def create_client(conn, addr, public_key, private_key):
                 message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
                 #print(f"<{addr[0]}> {message_decrypted}")
                 print(f"{username}: {message_decrypted}")
-                
+                log.info(f"{username}: {message_decrypted}".strip())
+
                 # calls message_all_clients function to send message to all 
                 message_to_send = f"{username}: {message_decrypted}"
                 message_all_clients(message_to_send, conn, public_key)
@@ -109,7 +112,7 @@ if __name__ == "__main__":
             print("Keys not found. Look at README and consider generating some!")
             exit()
         
-        start_new_thread(heartbeat_listener,())
+        #start_new_thread(heartbeat_listener,())
         
         # set up logging 
         log = logging.getLogger("mylog")
@@ -132,9 +135,14 @@ if __name__ == "__main__":
             #print(f"<{addr[0]}> Connected")
     
             # create client for each connected user
-            start_new_thread(create_client,(conn, addr, public_key, private_key))   
+            start_new_thread(create_client,(conn, addr, public_key, private_key, log))   
 
     except(KeyboardInterrupt, SystemExit):
-        print("\nServer Closed")
+        print("\nServer closed...")
         #conn.close()
+        log.info("Server closed.")
+        server.close()
+
+    except Exception as e:
+        log.warn(e)
         server.close()
