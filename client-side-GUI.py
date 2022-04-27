@@ -33,12 +33,14 @@ class MyDialog:
         username = self.myEntryBox.get()
         self.top.destroy()
 
-def spawnDialog(root, public_key):
+def spawnDialog(root, public_key, input_box, send_button):
     inputDialog = MyDialog(root)
     root.wait_window(inputDialog.top)
     #print('Username: ', username)
     message_encrypted = rsa.encrypt(username.encode(), public_key)
     server.send(message_encrypted)
+    input_box.configure(state='normal')
+    send_button.configure(state='normal')
 
 def return_kitty():
     return(r"""
@@ -195,12 +197,12 @@ if __name__ == "__main__":
         #disable our input box and button until the user puts a username in 
         input_box.configure(state='disabled')
         send_button.configure(state='disabled')
-        spawnDialog(root, public_key)
-        input_box.configure(state='normal')
-        send_button.configure(state='normal')
+        
+
 
         root.bind('<Return>', lambda event=None: send_button.invoke())
 
+        root.after(10, lambda: spawnDialog(root, public_key, input_box, send_button))
         root.mainloop()
         # Get user name
         
