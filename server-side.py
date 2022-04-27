@@ -29,9 +29,7 @@ def heartbeat_listener():
                 #print(e)
                 continue
 
-        
         time.sleep(1)
-
 
 def create_client(conn, addr, public_key, private_key, log):
 
@@ -45,15 +43,14 @@ def create_client(conn, addr, public_key, private_key, log):
     while threading.main_thread().isAlive(): 
         try: 
             # blocks until it gets at least one byte or the socket is closed
-            # that's why your [explitive] code wasn't working when you put it after this line  
             message = conn.recv(2048)
 
             if message: 
                 # prints message and addr of user who sent the message 
                 # on server terminal 
                 message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
-                #print(f"<{addr[0]}> {message_decrypted}")
-                print(f"{username}: {message_decrypted}")
+
+                print(f"{username}: {message_decrypted}".strip())
                 log.info(f"{username}: {message_decrypted}".strip())
 
                 # calls message_all_clients function to send message to all 
@@ -62,6 +59,7 @@ def create_client(conn, addr, public_key, private_key, log):
 
         except: 
             if conn in list_of_clients:
+                log.info(f"Removing {conn}")
                 list_of_clients.remove(conn)
 
 
@@ -73,11 +71,23 @@ def message_all_clients(message, connection, public_key):
             except: 
                 client.close()
                 if connection in list_of_clients:
+                    log.info(f"Removing {connection}")
                     list_of_clients.remove(connection)
                   
 if __name__ == "__main__":
+    
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+    
+    # set up logging 
+    log = logging.getLogger("mylog")
+    log.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(threadName)-11s %(levelname)-10s %(message)s")
+    filehandler = logging.FileHandler("server_log.txt", "a")
+    filehandler.setLevel(logging.INFO)
+    filehandler.setFormatter(formatter)
+    log.addHandler(filehandler)
+    
 
     if len(sys.argv) != 3:
         print("[WARNING] Incorrect usage of program.")
@@ -87,7 +97,7 @@ if __name__ == "__main__":
 
     else:
         
-
+        log.info("Starting server...")
         host_IP = str(sys.argv[1])
         port = int(sys.argv[2])
         server.bind((host_IP, port))
@@ -107,22 +117,13 @@ if __name__ == "__main__":
             public_file.close()
             private_file.close()
 
-        except:
-
-            print("Keys not found. Look at README and consider generating some!")
+        except Exception as e:
+            print(e)
+            log.warn(e)
             exit()
         
         #start_new_thread(heartbeat_listener,())
         
-        # set up logging 
-        log = logging.getLogger("mylog")
-        log.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s %(threadName)-11s %(levelname)-10s %(message)s")
-        filehandler = logging.FileHandler("server_log.txt", "a")
-        filehandler.setLevel(logging.INFO)
-        filehandler.setFormatter(formatter)
-        log.addHandler(filehandler)
-
     try:    
         while True:
             # conn is a socket object that can send and recieve data 
@@ -131,15 +132,11 @@ if __name__ == "__main__":
             list_of_clients.append(conn)
             list_of_addresses.append(addr)
     
-            # connect message
-            #print(f"<{addr[0]}> Connected")
-    
             # create client for each connected user
             start_new_thread(create_client,(conn, addr, public_key, private_key, log))   
 
     except(KeyboardInterrupt, SystemExit):
         print("\nServer closed...")
-        #conn.close()
         log.info("Server closed.")
         server.close()
 

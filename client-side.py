@@ -5,29 +5,50 @@ import rsa
 import threading
 from _thread import *
 
+def print_kitty():
+    print(r"""
+                                     ,
+              ,-.       _,---._ __  / \
+             /  )    .-'       `./ /   \
+            (  (   ,'            `/    /|
+             \  `-"             \'\   / |
+              `.              ,  \ \ /  |
+               /`.          ,'-`----Y   |
+              (            ;        |   '
+              |  ,-.    ,-'         |  /
+              |  | (   | Kitty Chat | /
+              )  |  \  `.___________|/
+              `--'   `--'
+              """)
 def listener(server, public_key, private_key):
-    
-    while True:
-        # maintains a list of possible input streams
-        #sockets_list = [sys.stdin, server]
-        sockets_list = [server]
+    try:
+        while True:
+            # maintains a list of possible input streams
+            #sockets_list = [sys.stdin, server]
+            sockets_list = [server]
 
-        # select.select is for monitoring sockets, open files, and pipes until they can be R/W 
-        # https://bip.weizmann.ac.il/course/python/PyMOTW/PyMOTW/docs/select/index.html
-        read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
+            # select.select is for monitoring sockets, open files, and pipes until they can be R/W 
+            # https://bip.weizmann.ac.il/course/python/PyMOTW/PyMOTW/docs/select/index.html
+            read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
 
-        # constantly checking between the server for broadcasted messages, 
-        # or sending a message of its own 
-        for socks in read_sockets:
-            if socks == server:
-                message = socks.recv(2048)
-                try:
-                    message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
-                    print(message_decrypted)
-                # for some reason, when the program first runs, the server sends some kind of unencrypted string,
-                # so the program whines and fails to decrypt the first time
-                except:
-                    continue 
+            # constantly checking between the server for broadcasted messages, 
+            # or sending a message of its own 
+            for socks in read_sockets:
+                if socks == server:
+                    message = socks.recv(2048)
+                    try:
+                        message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
+                        print(message_decrypted)
+                    # for some reason, when the program first runs, the server sends some kind of unencrypted string,
+                    # so the program whines and fails to decrypt the first time
+                    except:
+                        continue 
+    except Exception as e:
+        print(e)
+        server.close()
+        exit()
+
+
 
 if __name__ == "__main__":
     try:
@@ -68,7 +89,7 @@ if __name__ == "__main__":
             exit()
         
         start_new_thread(listener, (server, public_key, private_key))
-
+        print_kitty()
         # Get user name
         print("\nEnter username: " , end='')
         #print("Enter username: ")
