@@ -38,6 +38,7 @@ def create_client(conn, addr, public_key, private_key, log):
     # addr is formatted like IP, port, and we only care about IP. Cut it out. Also cut out leading parenthesis.
     ip_address = (str(addr).split(",")[0])[1:]
 
+    print(f"{username} connecting from {ip_address}")
     log.info(f"{username} connecting from {ip_address}")
 
     while threading.main_thread().isAlive(): 
