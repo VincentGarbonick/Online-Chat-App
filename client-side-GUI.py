@@ -202,8 +202,9 @@ if __name__ == "__main__":
 
 
         root.bind('<Return>', lambda event=None: send_button.invoke())
+        root.bind('<Escape>', lambda event : close_protocol(server, root))
 
-        root.after(10, lambda: spawnDialog(root, public_key, input_box, send_button))
+        root.after(10, lambda : spawnDialog(root, public_key, input_box, send_button))
         root.mainloop()
         # Get user name
         
