@@ -64,12 +64,14 @@ def listener(server, text_area, private_key):
 
 def send_message(text_area, public_key, server, input_box):
     # get all text from the input box 
+    text_area.configure(state='normal')
     text = input_box.get("1.0", "end-1c")
     text_area.insert(INSERT,f"Me:{text}\n")
     message_encrypted = rsa.encrypt(text.encode(), public_key)
     server.send(message_encrypted)
     
     input_box.delete('1.0', END)
+    text_area.configure(state='disabled')
 
 if __name__ == "__main__":
     try:
@@ -135,7 +137,7 @@ if __name__ == "__main__":
         root.resizable(False, False)
         text_area.insert(INSERT, "Welcome to Kitty Chat!\n")
         text_area.insert(INSERT, "Enter your username and press \"send\" to begin!\n")
-        
+        text_area.configure(state='disabled')
         start_new_thread(listener, (server, text_area, private_key))
 
         root.mainloop()
