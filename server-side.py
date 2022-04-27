@@ -39,7 +39,8 @@ def create_client(conn, addr, public_key, private_key, log):
     ip_address = (str(addr).split(",")[0])[1:]
 
     log.info(f"{username} connecting from {ip_address}")
-
+    print(f"{username} connecting from {ip_address}")
+    
     while threading.main_thread().isAlive(): 
         try: 
             # blocks until it gets at least one byte or the socket is closed
