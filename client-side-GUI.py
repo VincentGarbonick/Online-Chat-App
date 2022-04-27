@@ -34,7 +34,7 @@ def insert_tester(text_area):
         time.sleep(3)
 
 
-def listener(server, public_key, private_key):
+def listener(server, text_area, private_key):
     try:
         while True:
             # maintains a list of possible input streams
@@ -52,7 +52,7 @@ def listener(server, public_key, private_key):
                     message = socks.recv(2048)
                     try:
                         message_decrypted = rsa.decrypt(message, private_key).decode('utf8')
-                        print(message_decrypted)
+                        text_area.insert(INSERT,f"{message_decrypted}\n")
                     # for some reason, when the program first runs, the server sends some kind of unencrypted string,
                     # so the program whines and fails to decrypt the first time
                     except:
@@ -110,7 +110,6 @@ if __name__ == "__main__":
             print("Keys not found. Look at README and consider generating some!")
             exit()
         
-        #start_new_thread(listener, (server, public_key, private_key))
 
         # Creating tkinter main window
         root = Tk()
@@ -136,6 +135,9 @@ if __name__ == "__main__":
         root.resizable(False, False)
         text_area.insert(INSERT, "Welcome to Kitty Chat!\n")
         text_area.insert(INSERT, "Enter your username and press \"send\" to begin!\n")
+        
+        start_new_thread(listener, (server, text_area, private_key))
+
         root.mainloop()
         # Get user name
         
