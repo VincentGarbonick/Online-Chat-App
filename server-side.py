@@ -140,6 +140,12 @@ if __name__ == "__main__":
     except(KeyboardInterrupt, SystemExit):
         print("\nServer closed...")
         log.info("Server closed.")
+        message = "Server shutting down..."
+        for client in list_of_clients:
+            try: 
+                client.send(rsa.encrypt(message.encode(), public_key))
+            except: 
+                continue 
         server.close()
 
     except Exception as e:
