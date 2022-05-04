@@ -52,9 +52,6 @@ def listener(server, public_key, private_key):
 
 if __name__ == "__main__":
     try:
-        # TODO: consider rewriting client to something like this for...reasons 
-        # https://python.plainenglish.io/build-a-chatroom-app-with-python-458fc435025a
-
         # IPV4 and TCP 
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if len(sys.argv) != 3:

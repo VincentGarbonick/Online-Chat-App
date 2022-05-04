@@ -12,6 +12,7 @@ WIN_WIDTH = 40
 WIN_HEIGHT = 10
 TEXT_BOX_HEIGHT = 1.5
 
+# Prints a dialog for user to input their name 
 class MyDialog:
     def __init__(self, parent):
         top = self.top = Toplevel(parent)
@@ -27,12 +28,13 @@ class MyDialog:
         self.myEntryBox.focus_set()
         top.bind('<Return>', lambda event=None: self.mySubmitButton.invoke())
 
-
+    # for the send button. Sends the information to the main body 
     def send(self):
         global username
         username = self.myEntryBox.get()
         self.top.destroy()
 
+# Prints dialoge box, encrypts input, and sends to server
 def spawnDialog(root, public_key, input_box, send_button):
     inputDialog = MyDialog(root)
     root.wait_window(inputDialog.top)
@@ -59,12 +61,13 @@ def return_kitty():
               `--'   `--'
               """)
 
+# testing function
 def insert_tester(text_area):
     while True:
         text_area.insert(INSERT,"fart lol\n")
         time.sleep(3)
 
-
+# listens for communications from server when server broadcasts a message 
 def listener(server, text_area, private_key):
     try:
         while True:
@@ -99,6 +102,7 @@ def listener(server, text_area, private_key):
         server.close()
         exit()
 
+# sends a message to the server
 def send_message(text_area, public_key, server, input_box):
     # get all text from the input box 
     text_area.configure(state='normal')
@@ -112,6 +116,7 @@ def send_message(text_area, public_key, server, input_box):
     text_area.yview(END)
     text_area.configure(state='disabled')
 
+# closes the code out 
 def close_protocol(server, root):
     print("\nClient Exiting...")
     #close the socket
@@ -123,9 +128,6 @@ def close_protocol(server, root):
 
 if __name__ == "__main__":
     try:
-        # TODO: consider rewriting client to something like this for...reasons 
-        # https://python.plainenglish.io/build-a-chatroom-app-with-python-458fc435025a
-
         # IPV4 and TCP 
         
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

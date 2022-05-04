@@ -2,4 +2,4 @@ server-side-fake.py
 private.txt
 public.txt
 /RSA
-server_log.txt
+server_log*.txt

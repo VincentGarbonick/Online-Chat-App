@@ -14,6 +14,7 @@ import logging
 list_of_clients = []
 list_of_addresses = []
 
+# Sends a pulse to the client servers to make sure they are alive. Currently unimlemented. 
 def heartbeat_listener():    
     # instantiate a dummy socket object to test heartbeats with
     s = socket.socket()
@@ -31,6 +32,8 @@ def heartbeat_listener():
 
         time.sleep(1)
 
+# Creates a client serverside when a use connects
+# Inputs: Connection and address, keys, and logging object 
 def create_client(conn, addr, public_key, private_key, log):
 
     # wait on username authorization 
@@ -64,7 +67,7 @@ def create_client(conn, addr, public_key, private_key, log):
                 log.info(f"Removing {conn}")
                 list_of_clients.remove(conn)
 
-
+# Messages all the clients in the names list. 
 def message_all_clients(message, connection, public_key): 
     for client in list_of_clients:
         if client != connection:
